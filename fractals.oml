@@ -1,0 +1,60 @@
+#load "graphics.cma";;
+open Graphics;;
+open_graph ":0";;
+resize_window 800 800;;
+
+type complexe = {mutable a: float; mutable b: float};;
+
+let moduleComplexe c = 
+	Float.sqrt (c.a*.c.a +. c.b*.c.b);;
+	
+let additionComplexe z1 z2 = 
+	{a = z1.a +. z2.a; b = z1.b +. z2.b};;
+
+let multiplicationComplexe z1 z2 = 
+{a = z1.a *. z2.a -. z1.b *. z2.b; b = z2.a *. z1.b +. z1.a *. z2.b};;
+
+let translation x y = (x *. 200. +. 800., y *. 200. +. 400.);;
+
+let affiche (x,y) = 
+	plot (int_of_float x) (int_of_float y);;
+
+let main maxIteration = 
+	let epsilon = 0.0001 in 
+	let x = ref (-.2.) in 
+	let y = ref (-.2.) in 
+	while -2. <= !x && !x <= 2. do
+		while -2. <= !y && !y <= 2. do
+			let i = ref 0 in 
+			let c = {a = !x; b = !y} in 
+			let z = ref {a = 0.; b = 0.} in 
+			while (moduleComplexe !z) < 2. && !i < maxIteration do
+				begin 
+					z := additionComplexe (multiplicationComplexe !z !z) c;
+					incr i;
+				end
+			done;
+			print_int !i;
+			begin 
+			set_color (rgb (!i mod 256) (!i mod 256) (!i mod 256));
+			set_color black;
+			affiche (translation !x !y);
+			y := !y +. epsilon;
+			end
+		done;
+		x := !x +. epsilon;
+	done;;
+	
+let c = {a = -.1.2; b = 0.};;
+let z = {a = 0.; b = 0.} ;;
+moduleComplexe z;;
+moduleComplexe (additionComplexe (multiplicationComplexe z z) c);;
+
+
+
+(* 
+
+*)
+
+
+main 10;;
