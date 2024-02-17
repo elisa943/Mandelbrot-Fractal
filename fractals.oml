@@ -3,6 +3,10 @@ open Graphics;;
 open_graph ":0";;
 resize_window 800 800;;
 
+let maxIteration = 50;;
+
+let epsilon = 0.05;;
+
 type complexe = {mutable a: float; mutable b: float};;
 
 let moduleComplexe c = 
@@ -19,42 +23,55 @@ let translation x y = (x *. 200. +. 800., y *. 200. +. 400.);;
 let affiche (x,y) = 
 	plot (int_of_float x) (int_of_float y);;
 
-let main maxIteration = 
-	let epsilon = 0.0001 in 
+let mandelbrot c = 
+	let z = ref {a = 0.; b = 0.} in 
+	let n = ref 0 in 
+	while moduleComplexe (!z) <= 2. && !n < maxIteration do
+		z := additionComplexe (multiplicationComplexe !z !z) c;
+		incr n
+	done;
+	!n;;
+
+let sets_color n = 
+	if n < maxIteration then
+		let color = 255 - int_of_float (float_of_int (n*255) /. (float_of_int maxIteration)) in 
+		set_color (rgb color color color)
+	else
+		set_color black;;
+					
+let main () = 
 	let x = ref (-.2.) in 
 	let y = ref (-.2.) in 
 	while -2. <= !x && !x <= 2. do
 		while -2. <= !y && !y <= 2. do
-			let i = ref 0 in 
-			let c = {a = !x; b = !y} in 
-			let z = ref {a = 0.; b = 0.} in 
-			while (moduleComplexe !z) < 2. && !i < maxIteration do
-				begin 
-					z := additionComplexe (multiplicationComplexe !z !z) c;
-					incr i;
-				end
-			done;
-			print_int !i;
+			let n = mandelbrot {a = !x; b = !y} in
 			begin 
-			set_color (rgb (!i mod 256) (!i mod 256) (!i mod 256));
-			set_color black;
-			affiche (translation !x !y);
-			y := !y +. epsilon;
-			end
+				print_int n;
+				print_float (!x);
+				sets_color n;
+				affiche (translation !x !y);
+				
+			end;
+			y := !y +. epsilon
 		done;
-		x := !x +. epsilon;
+		x := !x +. epsilon
 	done;;
-	
-let c = {a = -.1.2; b = 0.};;
-let z = {a = 0.; b = 0.} ;;
-moduleComplexe z;;
-moduleComplexe (additionComplexe (multiplicationComplexe z z) c);;
+
+
+for i=0 to 799 do
+	for j=0 to 799 do
+		let c = {a = float_of_int i; b = float_of_int j} in 
+		let n = mandelbrot c in 
+			sets_color n;
+			plot i j
+	done
+done;;
 
 
 
-(* 
-
-*)
 
 
-main 10;;
+
+
+
+
